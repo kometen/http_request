@@ -66,8 +66,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 Some(l) => l,
                 _ => res.headers().get("location").unwrap()
             };
-            let url = std::str::from_utf8(l.as_bytes()).unwrap().to_string().parse()?;
-            res = client.get(url).await?;
+            let b64 = format!("Basic {}", base64::encode(format!("{}:{}", username, password)));
+            let url = std::str::from_utf8(l.as_bytes()).unwrap().to_string();
+            let req = Request::builder()
+                .method(Method::GET)
+                .uri(url)
+                .header("Authorization", b64)
+                .body(Body::from(""))?;
+    
+                res = client.request(req).await?;
         }
     }
 
